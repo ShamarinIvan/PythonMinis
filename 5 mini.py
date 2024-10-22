@@ -8,10 +8,7 @@ def specialize(f, *first_args, **first_kwargs):
         return f(*args, **kwargs)
     return omniknight
 
-asum(1, 2)
-specialize(asum, 6)(13)
-specialize(asum, 0, 8)()
-specialize(asum)(4, y = 4)
 if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
+    assert(specialize(asum, 6)(13)) == 19
+    assert(specialize(asum, 0, 8)()) == 8
+    assert(specialize(asum)(4, y = 4)) == 8
