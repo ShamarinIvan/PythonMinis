@@ -10,15 +10,11 @@ def reverse_dict(d):
         else:
             reversed_dict[value] = key
     return reversed_dict
-reversed_dict = reverse_dict({"Ivanov": 97832, "Petrov": 55521, "Kuznecov": 97832})
+
+assert reverse_dict({"Ivanov": 97832, "Petrov": 55521, "Kuznecov": 97832}) == {97832: ("Ivanov", "Kuznecov"), 55521: "Petrov"}
+assert reverse_dict({"Ivanov": 97832, "Petrov": 97832, "Kuznecov": 97832}) == {97832: ("Ivanov", "Petrov", "Kuznecov")}
 class MyTestCase(unittest.TestCase):
     def test1(self):
-        with self.assertRaises(TypeError):
-            reverse_dict({"Ivanov": 97832, "Petrov": 55521, "Kuznecov": 97832}) == {97832: ("Ivanov", "Kuznecov"), 55521: "Petrov"}
-    def test2(self):
-        with self.assertRaises(TypeError):
-            reverse_dict({"Ivanov": 97832, "Petrov": 97832, "Kuznecov": 97832}) == {97832: ("Ivanov", "Petrov", "Kuznecov")}
-    def test3(self):
         with self.assertRaises(TypeError):
             reverse_dict({"Ivanov": 97832, "Petrov": 55521, "Kuznecov": [97832, 55521]})
     
