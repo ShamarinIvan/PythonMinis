@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import time
+
 SIZE = 128
 ITERATIONS = 128
 
@@ -29,17 +30,20 @@ def game_of_life_python(field, iterations):
 def game_of_life_numpy(field, iterations):
     rows, cols = field.shape
     for _ in range(iterations):
-        neighbors = np.zeros_like(field)
-        neighbors[1:, 1:] += field[:-1, :-1]  # Верхний левый
-        neighbors[1:, :-1] += field[:-1, 1:]  # Верхний правый
-        neighbors[:-1, 1:] += field[1:, :-1]  # Нижний левый
-        neighbors[:-1, :-1] += field[1:, 1:]  # Нижний правый
-        neighbors[1:, :] += field[:-1, :]    # Верхний
-        neighbors[:-1, :] += field[1:, :]    # Нижний
-        neighbors[:, 1:] += field[:, :-1]    # Левый
-        neighbors[:, :-1] += field[:, 1:]    # Правый
-        field = (neighbors == 3) | ((field == 1) & (neighbors == 2))
-        field = field.astype(int)
+        new_field = np.zeros((rows, cols), dtype=int)
+        for i in range(rows):
+            for j in range(cols):
+                live_neighbors = sum(
+                    field[i + di, j + dj]
+                    for di in (-1, 0, 1)
+                    for dj in (-1, 0, 1)
+                    if (di != 0 or dj != 0) and 0 <= i + di < rows and 0 <= j + dj < cols
+                )
+                if field[i, j] == 1 and live_neighbors in (2, 3):
+                    new_field[i, j] = 1
+                elif field[i, j] == 0 and live_neighbors == 3:
+                    new_field[i, j] = 1
+        field = new_field
     return field
 
 def measure_time(func, *args):
@@ -49,8 +53,8 @@ def measure_time(func, *args):
     return result, end_time - start_time
 
 initial_field = generate_field(SIZE)
-python_field = initial_field.tolist()
-numpy_field = np.copy(initial_field)
+python_field = initial_field.tolist()  
+numpy_field = np.copy(initial_field) 
 
 python_result, python_time = measure_time(game_of_life_python, python_field, ITERATIONS)
 numpy_result, numpy_time = measure_time(game_of_life_numpy, numpy_field, ITERATIONS)
