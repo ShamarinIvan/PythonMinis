@@ -44,7 +44,7 @@ def main(task_count=10, consumer_count=4):
     total_result = sum(results)
     print(f"Consumers={consumer_count}, Result={total_result}")
 
-if name == "main":
+if __name__ == "__main__":
     start_time = time()
     main(task_count=20, consumer_count=4)
     print(f"Execution Time: {time() - start_time:.10f}s")
