@@ -2,7 +2,7 @@
 #include <Python.h>
 #include <stdlib.h>
 
-int is_square_matrix(PyObject *matrix, Py_ssize_t *size) {
+int is_square_matrix(PyObject* matrix, Py_ssize_t* size) {
     if (!PyList_Check(matrix)) {
         PyErr_SetString(PyExc_TypeError, "Matrix must be a list of lists");
         return 0;
@@ -10,7 +10,7 @@ int is_square_matrix(PyObject *matrix, Py_ssize_t *size) {
 
     Py_ssize_t n = PyList_Size(matrix);
     for (Py_ssize_t i = 0; i < n; i++) {
-        PyObject *row = PyList_GetItem(matrix, i);
+        PyObject* row = PyList_GetItem(matrix, i);
         if (!PyList_Check(row) || PyList_Size(row) != n) {
             PyErr_SetString(PyExc_ValueError, "Matrix must be square");
             return 0;
@@ -20,45 +20,41 @@ int is_square_matrix(PyObject *matrix, Py_ssize_t *size) {
     return 1;
 }
 
-
-void multiply_matrices(int n, int result, int a, int **b) {
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            result[i][j] = 0;
-            for (int k = 0; k < n; k++) {
+void multiply_matrices(Py_ssize_t n, double result, double a, double** b) {
+    for (Py_ssize_t i = 0; i < n; i++) {
+        for (Py_ssize_t j = 0; j < n; j++) {
+            result[i][j] = 0.0;
+            for (Py_ssize_t k = 0; k < n; k++) {
                 result[i][j] += a[i][k] * b[k][j];
             }
         }
     }
 }
 
-void copy_matrix(int n, int dest, int src) {
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
+void copy_matrix(Py_ssize_t n, double dest, double src) {
+    for (Py_ssize_t i = 0; i < n; i++) {
+        for (Py_ssize_t j = 0; j < n; j++) {
             dest[i][j] = src[i][j];
         }
     }
 }
 
-
-void matrix_power(int n, int result, int matrix, int power) {
-    int **temp = malloc(n * sizeof(int *));
-    for (int i = 0; i < n; i++) {
-        temp[i] = malloc(n * sizeof(int));
-        for (int j = 0; j < n; j++) {
-            temp[i][j] = (i == j) ? 1 : 0;
+void matrix_power(Py_ssize_t n, double result, double matrix, int power) {
+    double** temp = malloc(n * sizeof(double*));
+    for (Py_ssize_t i = 0; i < n; i++) {
+        temp[i] = malloc(n * sizeof(double));
+        for (Py_ssize_t j = 0; j < n; j++) {
+            temp[i][j] = (i == j) ? 1.0 : 0.0;
         }
     }
 
     copy_matrix(n, result, temp);
 
-
-    int **current = malloc(n * sizeof(int *));
-    for (int i = 0; i < n; i++) {
-        current[i] = malloc(n * sizeof(int));
+    double** current = malloc(n * sizeof(double*));
+    for (Py_ssize_t i = 0; i < n; i++) {
+        current[i] = malloc(n * sizeof(double));
     }
 
-    
     while (power > 0) {
         if (power % 2 == 1) {
             multiply_matrices(n, current, result, matrix);
@@ -69,8 +65,7 @@ void matrix_power(int n, int result, int matrix, int power) {
         power /= 2;
     }
 
-    
-    for (int i = 0; i < n; i++) {
+    for (Py_ssize_t i = 0; i < n; i++) {
         free(temp[i]);
         free(current[i]);
     }
@@ -78,9 +73,8 @@ void matrix_power(int n, int result, int matrix, int power) {
     free(current);
 }
 
-
-static PyObject *foreign_matrix_power(PyObject *self, PyObject *args) {
-    PyObject *matrix;
+static PyObject* foreign_matrix_power(PyObject* self, PyObject* args) {
+    PyObject* matrix;
     int power;
 
     if (!PyArg_ParseTuple(args, "Oi", &matrix, &power)) {
@@ -97,25 +91,25 @@ static PyObject *foreign_matrix_power(PyObject *self, PyObject *args) {
         return NULL;
     }
 
-    int **input_matrix = malloc(n * sizeof(int *));
-    int **result_matrix = malloc(n * sizeof(int *));
+    double** input_matrix = malloc(n * sizeof(double*));
+    double** result_matrix = malloc(n * sizeof(double*));
     for (Py_ssize_t i = 0; i < n; i++) {
-        input_matrix[i] = malloc(n * sizeof(int));
-        result_matrix[i] = malloc(n * sizeof(int));
+        input_matrix[i] = malloc(n * sizeof(double));
+        result_matrix[i] = malloc(n * sizeof(double));
 
-        PyObject *row = PyList_GetItem(matrix, i);
+        PyObject* row = PyList_GetItem(matrix, i);
         for (Py_ssize_t j = 0; j < n; j++) {
-            input_matrix[i][j] = (int)PyLong_AsLong(PyList_GetItem(row, j));
+            input_matrix[i][j] = PyFloat_AsDouble(PyList_GetItem(row, j));
         }
     }
 
     matrix_power(n, result_matrix, input_matrix, power);
 
-    PyObject *result = PyList_New(n);
+    PyObject* result = PyList_New(n);
     for (Py_ssize_t i = 0; i < n; i++) {
-        PyObject *row = PyList_New(n);
+        PyObject* row = PyList_New(n);
         for (Py_ssize_t j = 0; j < n; j++) {
-            PyList_SetItem(row, j, PyLong_FromLong(result_matrix[i][j]));
+            PyList_SetItem(row, j, PyFloat_FromDouble(result_matrix[i][j]));
         }
         PyList_SetItem(result, i, row);
     }
@@ -138,7 +132,7 @@ static PyMethodDef ForeignMethods[] = {
 static struct PyModuleDef foreignmodule = {
     PyModuleDef_HEAD_INIT,
     "foreign",
-    "Matrix Power Foreign Extension", 
+    "Matrix Power Foreign Extension",
     -1,
     ForeignMethods
 };
