@@ -17,21 +17,11 @@ class LRUCache:
         self.cache[key] = value
         if len(self.cache) > self.capacity:
             self.cache.popitem(last=False)
+cache = LRUCache(3)
+for i in range(6):
+    cache.put(i,i)
+print(2 in cache.cache.values()) #False
 
-def fibonacci(n, cache=None):
-    if cache is None:
-        cache = LRUCache(10)
     
-    if n <= 2:
-        return 1
-    if (result := cache.get(n)) is not None:
-        return result
-    result = fibonacci(n - 1, cache) + fibonacci(n - 2, cache)
-    cache.put(n, result)
-    return result
-
-print(fibonacci(6))
-        
-
     
     
