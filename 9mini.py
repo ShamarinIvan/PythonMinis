@@ -15,16 +15,16 @@ class LRUCache:
         if key in self.cache:
             self.cache.move_to_end(key)
         self.cache[key] = value
-        if(len(self.cache) > self.capacity):
-            self.cache.popitem(last = False)
+        if len(self.cache) > self.capacity:
+            self.cache.popitem(last=False)
 
-def fibonacci(n, cache = None):
+def fibonacci(n, cache=None):
     if cache is None:
         cache = LRUCache(10)
     
     if n <= 2:
         return 1
-    if((result := cache.get(n)) is not None):
+    if (result := cache.get(n)) is not None:
         return result
     result = fibonacci(n - 1, cache) + fibonacci(n - 2, cache)
     cache.put(n, result)
