@@ -34,7 +34,7 @@ def game_of_life_numpy(field, iterations):
         for i in range(rows):
             for j in range(cols):
                 live_neighbors = sum(
-                    field[i + di, j + dj]
+                    field.item(i + di, j + dj)
                     for di in (-1, 0, 1)
                     for dj in (-1, 0, 1)
                     if (di != 0 or dj != 0) and 0 <= i + di < rows and 0 <= j + dj < cols
