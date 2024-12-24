@@ -3,7 +3,7 @@ from time import time
 
 task_queue = []
 queue_lock = threading.Lock()
-
+flag = False
 def matrix_power(matrix, power):
     size = len(matrix)
     result = [[1 if i == j else 0 for j in range(size)] for i in range(size)]
@@ -20,17 +20,19 @@ def create_matrix(size, value):
     return [[value ** (i + j) for j in range(size)] for i in range(size)]
 
 def producer(task_count):
+    global flag
     size = 4
     for _ in range(task_count):
         task = (size, 2, 3)
         with queue_lock:
             task_queue.append(task)
         size += 1
+    flag = True
 
 def consumer(consumer_id, results):
     while True:
         with queue_lock:
-            if not task_queue:
+            if not task_queue and flag:
                 break
             task = task_queue.pop(0)
 
