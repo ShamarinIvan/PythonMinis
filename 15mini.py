@@ -1,30 +1,43 @@
 import threading
-from queue import Queue
-import numpy as np
 from time import time
 
-task_queue = Queue()
+task_queue = []
 queue_lock = threading.Lock()
 
+def matrix_power(matrix, power):
+    size = len(matrix)
+    result = [[1 if i == j else 0 for j in range(size)] for i in range(size)]
+
+    for _ in range(power):
+        temp = [[0] * size for _ in range(size)]
+        for i in range(size):
+            for j in range(size):
+                temp[i][j] = sum(matrix[i][k] * result[k][j] for k in range(size))
+        result = temp
+    return result
+
+def create_matrix(size, value):
+    return [[value ** (i + j) for j in range(size)] for i in range(size)]
+
 def producer(task_count):
-    size = 2
+    size = 4
     for _ in range(task_count):
         task = (size, 2, 3)
         with queue_lock:
-            task_queue.put(task)
-        size += 1 
+            task_queue.append(task)
+        size += 1
 
 def consumer(consumer_id, results):
     while True:
         with queue_lock:
-            if task_queue.empty():
+            if not task_queue:
                 break
-            task = task_queue.get()
-        
+            task = task_queue.pop(0)
+
         size, value, times = task
-        A = np.array([[value ** (i + j) for j in range(size)] for i in range(size)])
-        A = np.linalg.matrix_power(A, times)
-        result = np.sum(A)
+        matrix = create_matrix(size, value)
+        matrix = matrix_power(matrix, times)
+        result = sum(sum(row) for row in matrix)
         results[consumer_id] += result
 
 def main(task_count=10, consumer_count=4):
@@ -34,13 +47,15 @@ def main(task_count=10, consumer_count=4):
     producer_thread = threading.Thread(target=producer, args=(task_count,))
     producer_thread.start()
     producer_thread.join()
-
+    
     for i in range(consumer_count):
         thread = threading.Thread(target=consumer, args=(i, results))
         threads.append(thread)
         thread.start()
+    
     for thread in threads:
         thread.join()
+
     total_result = sum(results)
     print(f"Consumers={consumer_count}, Result={total_result}")
 
